@@ -1,53 +1,85 @@
 import numpy as np
 
-nb_actions = 3
-nb_states = 4
-x = y =0.25
 
-T = np.zeros(nb_actions, nb_states, nb_states)
-# first action
-T[0, 1, 1] = 1-x
-T[0, 1, 3] = x
-T[0, 2, 0] = 1-y
-T[0, 2, 3] = y
-T[0, 3, 0] = 1
+def fill_trans_mat(x, y):
+    """
 
-# second action
-T[1, 0, 1] = 1
+    :param x: int
+    :param y: int
+    :return: np.array
+    """
+    trans_mat=np.zeros((3, 4, 4))
+    # first action
+    trans_mat[0, 1, 1] = 1 - x
+    trans_mat[0, 1, 3] = x
+    trans_mat[0, 2, 0] = 1 - y
+    trans_mat[0, 2, 3] = y
+    trans_mat[0, 3, 0] = 1
+    # second action
+    trans_mat[1, 0, 1] = 1
+    # third action
+    trans_mat[2, 0, 2] = 1
 
-# third action
-T[2, 0, 2] = 1
-
-# Reward
-R = np.array([0,0,1,10])
-
-
-
+    return trans_mat
 
 
+def sum_function(state, utility, trans_mat):
+    """
+
+    :param state:
+    :param utility:
+    :param trans_mat:
+    :return:
+    """
+    A = np.zeros(trans_mat.shape[0])
+    for a in range(trans_mat.shape[0]):
+            A[a] = np.dot(trans_mat[a, state], utility)
+    return A
 
 
-def action_value(s, V, T, gamma,R):
-    A = np.zeros(nb_actions)
-    for a in range(nb_actions):
-            A[a] =gamma*np.dot(T[a,s,:],V[])
+def rms_error(utils, utils_prime):
+    """
+    Root mean square error
+    :param utils:
+    :param utils_prime:
+    :return:
+    """
+    return (1/utils.shape[0])*np.sqrt(np.sum(np.square(utils-utils_prime)))
 
 
-
-def value_iteration(epsilon=0.0001, gamma=1):
-    Actions = np.zeros(nb_actions)
-    Values = np.zeros(nb_states)
-    policy = np.zeros([nb_states, nb_actions])
-    delta = 0
+def value_iteration(rewards, x, y, gamma, epsilon=0.0001):
+    """
+    Train value_iteration algorithm.
+    :param rewards:
+    :param x:
+    :param y:
+    :param gamma:
+    :param epsilon:
+    :return:
+    """
+    trans_mat = fill_trans_mat(x,y)
+    utils_prime = np.zeros_like(rewards)
+    iterate = True
     # find the optimal value function
-    while True:
+    while iterate:
+        utils = np.copy(utils_prime)
         # update value function at every state
-        for s in range(nb_actions):
-            A = action_value(s,Values)
-            best_action_value =
-        # check the stop condition
+        for i in range(rewards.shape[0]):
+            utils_prime[i] = rewards[i]+gamma*np.max(sum_function(i, utils, trans_mat))
+        error = rms_error(utils, utils_prime)
+        if error<epsilon:
+            iterate = False
+
+    # find the policy 
+    policy = np.zeros(rewards.shape[0])
+    for state in range(rewards.shape[0]):
+        policy[state] = np.argmax(sum_function(state, utils, trans_mat))
+
+    return policy, utils
 
 
-    # find the optimal policy
-
-    return policy, V
+if __name__ =="__main__":
+    rewards = np.array([0, 0, 1, 10])
+    policy, utils = value_iteration(rewards, x=0.25, y=0.25, gamma=0.9)
+    print('utility: ', utils)
+    print('policy: ', policy)
