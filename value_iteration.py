@@ -3,10 +3,10 @@ import numpy as np
 
 def fill_trans_mat(x, y):
     """
-
+    Fill the transition matrix
     :param x: int
     :param y: int
-    :return: np.array
+    :return: (np.array) transition matrix
     """
     trans_mat=np.zeros((3, 4, 4))
     # first action
@@ -25,7 +25,7 @@ def fill_trans_mat(x, y):
 
 def sum_function(state, utility, trans_mat):
     """
-
+    Calculate the utility of taking any possible action on a state.
     :param state:
     :param utility:
     :param trans_mat:
